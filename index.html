@@ -2,16 +2,15 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<title>1231all – 母指ROM評価</title>
+<title>1231all – 母指ROM</title>
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <style>
 body{
   background:#111;color:#eee;
-  font-family:system-ui,-apple-system;
-  padding:16px;margin:0
+  font-family:system-ui;padding:16px;margin:0
 }
-h1{font-size:18px;margin-bottom:10px}
+h1{font-size:18px;margin-bottom:8px}
 .section{
   background:#1e1e1e;
   padding:12px;border-radius:10px;
@@ -20,7 +19,7 @@ h1{font-size:18px;margin-bottom:10px}
 button{
   background:#333;color:#fff;
   border:none;border-radius:8px;
-  padding:8px 12px;font-size:13px
+  padding:6px 10px;font-size:13px
 }
 button:hover{background:#555}
 #result{line-height:1.6}
@@ -30,118 +29,109 @@ button:hover{background:#555}
 }
 #tools{
   position:fixed;right:12px;bottom:12px;
-  display:flex;gap:10px
+  display:flex;gap:8px
 }
-.note{font-size:12px;color:#bbb;margin-top:6px}
+.guide img{
+  max-width:100%;
+  margin-top:6px;
+  border-radius:6px;
+  display:none;
+}
 </style>
 </head>
 
 <body>
-
 <h1>母指 可動域評価（1231all）</h1>
 
-<!-- ① MP / IP -->
 <div class="section">
-<b>① MP / IP（屈曲・伸展）</b><br><br>
+<b>① MP / IP（屈曲・伸展）</b><br>
 <input type="file" id="video1" accept="video/*">
 <button onclick="runMPIP()">解析</button>
 </div>
 
-<!-- ② CMC 掌側外転 -->
 <div class="section">
-<b>② CMC 掌側外転</b><br><br>
-<button onclick="openGuide('CM22.png')">ガイド画像</button><br><br>
+<b>② CMC 掌側外転</b><br>
 <input type="file" id="video2" accept="video/*">
 <button onclick="runCMC2()">解析</button>
+<button onclick="toggleGuide('g2')">ガイド画像</button>
+<div class="guide">
+  <img id="g2" src="CM22.png" alt="CMC 掌側外転 ガイド">
+</div>
 </div>
 
-<!-- ③ CMC 橈側外転 -->
 <div class="section">
-<b>③ CMC 橈側外転</b><br><br>
-<button onclick="openGuide('CM2.png')">ガイド画像</button><br><br>
+<b>③ CMC 橈側外転</b><br>
 <input type="file" id="video3" accept="video/*">
 <button onclick="runCMC3()">解析</button>
+<button onclick="toggleGuide('g3')">ガイド画像</button>
+<div class="guide">
+  <img id="g3" src="CM2.png" alt="CMC 橈側外転 ガイド">
+</div>
 </div>
 
-<!-- ④ 母指対立（自己記載） -->
 <div class="section">
 <b>④ 母指対立（JOA準拠・自己記載）</b><br>
-母指指尖が到達した部位を選択してください。<br><br>
-<label><input type="radio" name="opp" value="示指基部"> 示指基部</label><br>
-<label><input type="radio" name="opp" value="中指基部"> 中指基部</label><br>
-<label><input type="radio" name="opp" value="薬指基部"> 薬指基部</label><br>
-<label><input type="radio" name="opp" value="小指基部"> 小指基部</label><br><br>
-<button onclick="recordOpposition()">記録</button>
+<label><input type="radio" name="opp"> 示指基部</label>
+<label><input type="radio" name="opp"> 中指基部</label>
+<label><input type="radio" name="opp"> 薬指基部</label>
+<label><input type="radio" name="opp"> 小指基部</label>
 </div>
 
-<!-- 結果 -->
 <div class="section" id="result">結果表示</div>
 
-<!-- HUD -->
 <div id="hud"></div>
 
-<!-- ツール -->
 <div id="tools">
 <button onclick="copyDebugLog()">ログコピー</button>
 <button onclick="toggleJOA()">JOA参考値</button>
 </div>
 
-<!-- JOA -->
 <div class="section" id="joa" style="display:none">
 <b>JOA 参考可動域（母指）</b><br><br>
-① MP：屈曲 60° / 伸展 10°<br>
-① IP：屈曲 80° / 伸展 20°<br><br>
-② CMC 掌側外転：90°<br>
-③ CMC 橈側外転：60°<br><br>
-④ 母指対立：示指〜小指基部到達（段階評価）
+MP：屈曲 60° / 伸展 10°<br>
+IP：屈曲 80° / 伸展 20°<br>
+CMC 掌側外転：90°<br>
+CMC 橈側外転：60°<br><br>
+※ 本アプリは画像解析による推定値
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
 
-<!-- ガイド画像 -->
-<script>
-function openGuide(img){
-  window.open(img,"_blank");
-}
-</script>
-
-<!-- Analyze.js -->
 <script type="module">
 import {
   initDebug, copyDebugLog,
-  analyzeMPIP, analyzeCMC, log
+  analyzeMPIP, analyzeCMC
 } from "./Analyze.js";
 
 window.copyDebugLog = copyDebugLog;
 
-window.onload = ()=>initDebug("hud");
+window.onload = ()=>{
+  initDebug("hud");
+};
 
 window.runMPIP = ()=>{
-  const f=document.getElementById("video1").files[0];
+  const f = document.getElementById("video1").files[0];
   if(f) analyzeMPIP(f,"result");
 };
 
 window.runCMC2 = ()=>{
-  const f=document.getElementById("video2").files[0];
+  const f = document.getElementById("video2").files[0];
   if(f) analyzeCMC(f,"result","② CMC 掌側外転");
 };
 
 window.runCMC3 = ()=>{
-  const f=document.getElementById("video3").files[0];
+  const f = document.getElementById("video3").files[0];
   if(f) analyzeCMC(f,"result","③ CMC 橈側外転");
 };
 
 window.toggleJOA = ()=>{
-  const e=document.getElementById("joa");
-  e.style.display=(e.style.display==="none")?"block":"none";
+  const j = document.getElementById("joa");
+  j.style.display = (j.style.display==="none")?"block":"none";
 };
 
-window.recordOpposition = ()=>{
-  const v=document.querySelector('input[name="opp"]:checked');
-  if(!v) return;
-  document.getElementById("result").innerHTML +=
-    `<br><br><b>④ 母指対立</b>：${v.value}`;
-  log("opposition recorded");
+window.toggleGuide = (id)=>{
+  const e = document.getElementById(id);
+  e.style.display = (e.style.display==="none")?"block":"none";
 };
 </script>
 
